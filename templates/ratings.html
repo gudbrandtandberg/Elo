@@ -1,0 +1,194 @@
+<html>
+<head>
+    <title>Elo</title>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+
+    <script type="text/javascript">
+        
+        var A_data = {{ A_history }};
+        var B_data = {{ B_history }};
+        
+        var white = "{{ white }}"
+
+        var setColors = function(white) {
+            if (white == "{{A}}") {
+                document.getElementById("rating-A").classList.add("white")
+                document.getElementById("rating-B").classList.add("black")
+            } else {
+                document.getElementById("rating-A").classList.add("black")
+                document.getElementById("rating-B").classList.add("white")
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById("home-button").onclick = function() {
+                window.location = "/"
+            }
+            setColors(white)
+            options = {
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return "";
+                            }
+                        }
+                    }]
+                }
+            }
+
+            ctx = document.getElementById("cvs").getContext("2d")
+            
+            labels = new Array(A_data.length)
+            for (var i=0; i<labels.length; i++) {
+                labels[i] = "Spill #" + i
+            }
+
+            var myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: labels, 
+                    datasets: [
+                        {
+                            data: A_data, 
+                            fill: false, 
+                            label: "{{A}}", 
+                            backgroundColor: "#00f", 
+                            borderColor: "#00f"
+                        },
+                        {
+                            data: B_data, 
+                            fill: false, 
+                            label: "{{B}}", 
+                            backgroundColor: "#f00", 
+                            borderColor: "#f00"
+                        }
+                    ]},
+                options: options
+            });
+        }
+
+    </script>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-top: 30px;
+        }
+
+        #canvasbox {
+            
+        }
+
+        .elobox {
+            font-size: x-large;
+            width: 100%;
+            text-align: center;
+        }
+
+        .eloboxbox {
+            margin-bottom: 10px; 
+            border-top: solid 2px black;
+            border-bottom: solid 2px black;
+        }
+
+        .black {
+            background-color: black;
+            color: white;
+        }
+
+        .white {
+            background-color: white;
+            color: black;
+        }
+
+        button {
+            border: none;
+            color: white;
+            padding: 15px 0px; 
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        button:hover {
+            opacity: 0.7;
+        }
+
+        .A {
+            background-color: #00f;
+        }
+
+        .B {
+            background-color: #f00;
+        }
+
+        .remis {
+            background-color: #4CAF50; /* Green */
+        }
+        
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        table button {
+            width: 100%;
+        }
+
+        #home-button {
+            position: absolute;
+            top: 3px; 
+            right: 3px;
+            
+            
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <a id="home-button" href="/"><img width="20px" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJPSURBVGhD7do5ixRBGIfx8QYRDERQWPAIzQQRBAURv4LgCoLifSsiiIGBkZmIibBgZiAaKpgIot9AEBMxMRINDNREPJ7/sK80RU3121d1g/3CL5iarmaenZmlZ3Yn44zzf806bF20Sgt9zzye4SZWaMEx1/EbfxZ9xnb0NldgD0YewxPzDcV9soBe5jLCByOemNi+h8g+syJMWUxsT/YQRRRf3/IjuC2pmPBYyRpyCWHEO2zCk8KamRUTHifZQmZFbIRmJbwx4TGSJeQiUhE23pjwfuk85AJSEUtwDmumt9Ixy6EJ75NOQzwRd6D1V/DGhOvSWch5eCOMNyZck05C9FKpGmE8MTGthzSJMHViWg05i6YRpmpMayFn0FaEqRLTSkgXEcYb0zjkNLqKMJ6Yl1iKWnMKXUcYT8wDVI7JGWFajzmJ3BGmtZgT6CvCNI4ZQoSpHXMcQ4kwxRhd5pfG7MIvFA/oO8J4Ym5gOuGXBUOJMGUxLzCdzfgELb7BkCJMGPMIWtfb4Rj+zVrshN5YmroRb3EUBxIO4Sli+1OKMXp8e7FjemvGNHkm9Ox6Rj/VD4idI6UYk5wmEV9RZeo8K+KK0W+w2GaPXCFyDcnZjdhGj5wh+sY+OWMIxpAaxhCPMaSGMcRjUCG6cIxt9NBfY6vMc8TO43EVyZlDbKOXrkg9sx5fEDuHx0GUjj5YxTZ7fIc+ft5OuIePiO33+IkNKJ3DiJ1gKO7DPXcRO0nfXmM1Ks0RvEfshLnp/XQLjf7BZgv2YH8P9mEbliExk8lfN8HbebLAzesAAAAASUVORK5CYII="></a>
+
+    <h1>{{A}}-{{B}} Chess Ratings</h1>
+    
+    <table class="eloboxbox">
+        <td>
+            <div class="elobox" id="rating-A" >{{A}}: {{A_elo}}</div>
+        </td>
+        <td>
+            <div class="elobox" id="rating-B">{{B}}: {{B_elo}}</div>
+        </td>
+    </table>
+    
+    <div id="canvasbox">
+        <canvas id="cvs" width="400px" height="100px"></canvas>
+    </div>
+
+    <h2>New result:</h2>
+    <form action="/new?p1={{A}}&p2={{B}}" method="POST" id="new-game-form">
+        <table id="buttontable">
+            <td>
+                <button class="A" type="submit" name="result" value="A">{{A}} won</button>
+            </td>
+            <td>
+                <button class="B" type="submit" name="result" value="B">{{B}} won</button>
+            </td>
+            <td>
+                <button class="remis" type="submit" name="result" value="remis">Draw</button>
+            </td>
+        </table>
+    </form>
+
+</body>
+</html>
