@@ -10,6 +10,7 @@ initial_elo = 0
 time_format = "%d-%m-%Y %H:%M"
 table_row = "<tr><td><a href='/ratings?p1={0}&p2={1}'>{0}</a></td><td><a href='/ratings?p1={0}&p2={1}'>{1}</a></td></tr>"
 logfile_format = "games/{0}_{1}.csv"
+PASSWORD = "tal"
 app = Flask(__name__)
 
 #########################################################################
@@ -57,6 +58,12 @@ def ratings():
 @app.route('/new', methods=["POST"])
 def save_new_result():
     form = request.form
+
+    if "password" not in form:
+        return "password not present - error"
+    if form["password"] != PASSWORD:
+        return "wrong password - access denied"
+
     if "result" not in form:
         return "Error: no result in form!"
     p1, p2 = parse_players()
