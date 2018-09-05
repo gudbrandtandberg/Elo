@@ -8,7 +8,7 @@
         
         var A_data = {{ A_history }};
         var B_data = {{ B_history }};
-        
+        var dates_data = {{ dates|safe }};
         var white = "{{ white }}"
 
         var setColors = function(white) {
@@ -42,7 +42,7 @@
             
             labels = new Array(A_data.length)
             for (var i=0; i<labels.length; i++) {
-                labels[i] = "Spill #" + i
+                labels[i] = "Spill #" + i + ": " + dates_data[i]
             }
 
             var myLineChart = new Chart(ctx, {
