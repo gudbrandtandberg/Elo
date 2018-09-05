@@ -42,7 +42,7 @@ def add_pairing():
 def ratings():
     p1, p2 = parse_players()
     logfile = "games/{}_{}.csv".format(p1, p2)
-    p1_history, p2_history = compute_elo(logfile)
+    p1_history, p2_history, dates = compute_elo(logfile)
 
     white = p1 if len(p1_history) % 2 == 1 else p2
 
@@ -51,6 +51,7 @@ def ratings():
                             B=p2, \
                             A_elo=p1_history[-1], \
                             B_elo=p2_history[-1], \
+                            dates=dates, \
                             A_history=p1_history, \
                             B_history=p2_history, \
                             white=white)
@@ -111,6 +112,8 @@ def compute_elo(logfile):
     d_types = {"A": float, "B": float}
     log = pd.read_csv(logfile, header=0, dtype=d_types)
 
+    dates = log["Date"].tolist()
+
     n_games = log.shape[0]
 
     A_history = [elo_A]
@@ -130,7 +133,7 @@ def compute_elo(logfile):
         A_history.append(elo_A)
         B_history.append(elo_B)
 
-    return (A_history, B_history)
+    return A_history, B_history, dates
 
 #########################################################################
 # Elo; the following two functions taken from https://github.com/rshk/elo
