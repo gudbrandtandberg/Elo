@@ -39,10 +39,11 @@
             }
 
             ctx = document.getElementById("cvs").getContext("2d")
-            
-            labels = new Array(A_data.length)
-            for (var i=0; i<labels.length; i++) {
-                labels[i] = "Spill #" + i + ": " + dates_data[i]
+
+            labels = new Array(dates_data.length+1)
+            labels[0] = "Start"
+            for (var i=1; i<labels.length; i++) {
+                labels[i] = "Spill #" + i + ": " + dates_data[i-1]
             }
 
             var myLineChart = new Chart(ctx, {
