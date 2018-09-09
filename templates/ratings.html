@@ -3,6 +3,7 @@
     <title>Elo</title>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
     <script type="text/javascript">
         
@@ -22,6 +23,14 @@
         }
 
         window.onload = function() {
+
+            // $("#new-result-form").submit(function(e) {
+            //     e.preventDefault()
+            //     $.post("/new?p1={{A}}&p2={{B}}", $("new-result-form").serialize(), function(data, status, xhr) {
+            //         alert(status)
+            //     })
+            // })
+
             document.getElementById("home-button").onclick = function() {
                 window.location = "/"
             }
@@ -183,7 +192,7 @@
     </div>
 
     <h2>New result:</h2>
-    <form id="new-result-form" action="/new?p1={{A}}&p2={{B}}" method="POST" id="new-game-form">
+    <form id="new-result-form" action="/new?p1={{A}}&p2={{B}}" method="POST">
         <table id="buttontable">
             <td>
                 <button class="A" type="submit" name="result" value="A">{{A}} won</button>

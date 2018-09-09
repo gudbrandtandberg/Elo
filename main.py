@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 import datetime
 import pandas as pd
+import json
 import os
 
 #########################################################################
@@ -10,7 +11,7 @@ initial_elo = 0
 time_format = "%d-%m-%Y %H:%M"
 table_row = "<tr><td><a href='/ratings?p1={0}&p2={1}'>{0}</a></td><td><a href='/ratings?p1={0}&p2={1}'>{1}</a></td></tr>"
 logfile_format = "games/{0}_{1}.csv"
-PASSWORD = "tal"
+password_file = "passwords.json"
 app = Flask(__name__)
 
 #########################################################################
@@ -28,12 +29,20 @@ def home():
     
     return render_template("mainpage.html", pairings=pairings_table)
 
-@app.route("/add_pairing")
+@app.route("/add_pairing", methods=["POST"])
 def add_pairing():
     p1, p2 = parse_players()
+    password = request.form["password"]
+
+    # create games.csv file
     logfile = logfile_format.format(p1, p2)
     with open(logfile, "w") as f:
         f.write("Date, A, B\n")
+
+    # save the password
+    ps = load_passwords()
+    ps["{}_{}".format(p1, p2)] = password
+    save_passwords(ps)
 
     return redirect("/")
     
@@ -59,21 +68,32 @@ def ratings():
 @app.route('/new', methods=["POST"])
 def save_new_result():
     form = request.form
+    p1, p2 = parse_players()
 
     if "password" not in form:
         return "password not present - error"
-    if form["password"] != PASSWORD:
+
+    ps = load_passwords()
+    pswd = ps["{}_{}".format(p1, p2)]
+
+    if form["password"] != pswd:
         return "wrong password - access denied"
 
     if "result" not in form:
         return "Error: no result in form!"
-    p1, p2 = parse_players()
+    
     save_result(p1, p2, form["result"])
     return redirect("/ratings?p1={}&p2={}".format(p1, p2))
 
 
 #########################################################################
 # Processing
+
+def load_passwords():
+    return json.load(open(password_file, "r"))
+
+def save_passwords(psw):
+    json.dump(psw, open(password_file, "w"))
 
 def parse_players():
     if "p1" not in request.args or "p2" not in request.args:
