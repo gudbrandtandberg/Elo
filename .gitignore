@@ -1,2 +1,4 @@
 passwords.json
 games/*
+__pycache__
+*.pyc
