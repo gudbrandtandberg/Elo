@@ -51,6 +51,13 @@ def add_pairing():
 def ratings():
     p1, p2 = parse_players()
     logfile = "games/{}_{}.csv".format(p1, p2)
+
+    d_types = {"A": float, "B": float}
+    log = pd.read_csv(logfile, header=0, dtype=d_types)
+
+    A_daily, B_daily = compute_daily_score(log)
+    A_total, B_total = compute_scores(log)
+
     p1_history, p2_history, dates = compute_elo(logfile)
 
     white = p1 if len(p1_history) % 2 == 1 else p2
@@ -63,7 +70,11 @@ def ratings():
                             dates=dates, \
                             A_history=p1_history, \
                             B_history=p2_history, \
-                            white=white)
+                            white=white, \
+                            A_daily=A_daily, \
+                            B_daily=B_daily, \
+                            A_total=A_total, \
+                            B_total=B_total )
 
 @app.route('/new', methods=["POST"])
 def save_new_result():
@@ -122,6 +133,29 @@ def parse_result(p1, p2, result):
         p2_res = "0.5"
 
     return (p1_res, p2_res)
+
+
+def compute_daily_score(log, day="today"):
+    
+    log["Date"] = pd.to_datetime(log["Date"], format="%d-%m-%Y %H:%M")
+    
+    # today = log["Date"][0].strftime("%d-%m-%Y")
+    today = datetime.datetime.now().strftime("%d-%m-%Y")
+    today_start = today + " 00:00:00"
+    today_end   = today + " 23:59:59"
+    today_start = datetime.datetime.strptime(today_start, "%d-%m-%Y %H:%M:%S")
+    today_end   = datetime.datetime.strptime(today_end, "%d-%m-%Y %H:%M:%S")
+
+    subset = log[(log["Date"] > today_start) & (log["Date"] < today_end)]
+    
+    return compute_scores(subset)
+
+def compute_scores(subset):
+
+    A_sum = sum(subset[" A"])
+    B_sum = sum(subset[" B"])
+
+    return A_sum, B_sum
 
 def compute_elo(logfile):
     """Computes Elo's from game history"""
