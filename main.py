@@ -150,10 +150,17 @@ def compute_daily_score(log, day="today"):
     
     return compute_scores(subset)
 
+def to_int(val):
+    if val % 1 == 0: return int(val)
+    return val
+
 def compute_scores(subset):
 
     A_sum = sum(subset[" A"])
     B_sum = sum(subset[" B"])
+
+    A_sum = to_int(A_sum)
+    B_sum = to_int(B_sum)
 
     return A_sum, B_sum
 
