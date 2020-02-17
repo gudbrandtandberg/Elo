@@ -74,7 +74,8 @@ def ratings():
                             A_daily=A_daily, \
                             B_daily=B_daily, \
                             A_total=A_total, \
-                            B_total=B_total )
+                            B_total=B_total, 
+                            P=8 )
 
 @app.route('/new', methods=["POST"])
 def save_new_result():
@@ -167,8 +168,8 @@ def compute_scores(subset):
 def compute_elo(logfile):
     """Computes Elo's from game history"""
 
-    elo_B = initial_elo
-    elo_A = initial_elo
+    elo_B = _elo_B = initial_elo
+    elo_A = _elo_A = initial_elo
 
     d_types = {"A": float, "B": float}
     log = pd.read_csv(logfile, header=0, dtype=d_types)
@@ -180,6 +181,9 @@ def compute_elo(logfile):
     A_history = [elo_A]
     B_history = [elo_B]
 
+    A_float = [elo_A]
+    B_float = [elo_B]
+
     for i in range(n_games): 
         
         res_A = log.iloc[i,1]
@@ -188,11 +192,23 @@ def compute_elo(logfile):
         exp_B = expected(elo_B, elo_A)
         exp_A = expected(elo_A, elo_B)
 
-        elo_A = int(round(elo(elo_A, exp_A, res_A)))
-        elo_B = int(round(elo(elo_B, exp_B, res_B)))
+        new_A, diff_A = elo(elo_A, exp_A, res_A)
+        new_B, diff_B = elo(elo_B, exp_B, res_B)
+
+        _elo_A = _elo_A + diff_A
+        _elo_B = _elo_B + diff_B
+
+        elo_A = int(round(new_A))
+        elo_B = int(round(new_B))
         
         A_history.append(elo_A)
         B_history.append(elo_B)
+
+        A_float.append(_elo_A)
+        B_float.append(_elo_B)
+
+    A_history = list(map(lambda x: int(round(x)), A_float))
+    B_history = list(map(lambda x: int(round(x)), B_float))
 
     return A_history, B_history, dates
 
@@ -207,7 +223,6 @@ def expected(A, B):
     """
     return 1 / (1 + 10 ** ((B - A) / 400))
 
-
 def elo(old, exp, score, k=16):
     """
     Calculate the new Elo rating for a player
@@ -216,7 +231,9 @@ def elo(old, exp, score, k=16):
     :param score: The actual score for this match
     :param k: The k-factor for Elo (default: 16)
     """
-    return old + k * (score - exp)
+    _elo = k * (score - exp)
+
+    return old + _elo, _elo
 
 if __name__ == '__main__':  
   app.run(host='127.0.0.1', port=5000)
