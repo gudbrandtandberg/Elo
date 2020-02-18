@@ -54,11 +54,17 @@ def ratings():
 
     d_types = {"A": float, "B": float}
     log = pd.read_csv(logfile, header=0, dtype=d_types)
+    log["Date"] = pd.to_datetime(log["Date"], format="%d-%m-%Y %H:%M")
 
-    A_daily, B_daily = compute_daily_score(log)
+    A_daily, B_daily = compute_daily_score(log, date="today")
     A_total, B_total = compute_scores(log)
 
-    p1_history, p2_history, dates = compute_elo(logfile)
+    daily_scores = compute_daily_scores(log)
+
+    p1_history, p2_history, dates = compute_elo(log)
+    dates_str = list(map(lambda x: x.strftime("%d-%m-%Y"), dates))
+
+    P = compute_points_to_win(p1_history[-1], p2_history[-1])
 
     white = p1 if len(p1_history) % 2 == 1 else p2
 
@@ -67,7 +73,7 @@ def ratings():
                             B=p2, \
                             A_elo=p1_history[-1], \
                             B_elo=p2_history[-1], \
-                            dates=dates, \
+                            dates=dates_str, \
                             A_history=p1_history, \
                             B_history=p2_history, \
                             white=white, \
@@ -75,7 +81,8 @@ def ratings():
                             B_daily=B_daily, \
                             A_total=A_total, \
                             B_total=B_total, 
-                            P=8 )
+                            P=P, 
+                            daily_scores=daily_scores )
 
 @app.route('/new', methods=["POST"])
 def save_new_result():
@@ -135,19 +142,36 @@ def parse_result(p1, p2, result):
 
     return (p1_res, p2_res)
 
-
-def compute_daily_score(log, day="today"):
+def compute_points_to_win(elo_A, elo_B):
     
-    log["Date"] = pd.to_datetime(log["Date"], format="%d-%m-%Y %H:%M")
+    e = expected(elo_A, elo_B)
+    _, diff_A = elo(elo_A, e, 1)
+
+    return int(round(diff_A))
+
+def compute_daily_scores(log):
+    dates = log["Date"].tolist()
+    days = list(set(list(map(lambda x: x.strftime("%d-%m-%Y"), dates))))
+    scores = {}
+    for day in days:
+        A_sum, B_sum = compute_daily_score(log, date=day)
+        scores[day] = [A_sum, B_sum]
+    return scores
+
+def compute_daily_score(log, date="today"):
     
     # today = log["Date"][0].strftime("%d-%m-%Y")
-    today = datetime.datetime.now().strftime("%d-%m-%Y")
-    today_start = today + " 00:00:00"
-    today_end   = today + " 23:59:59"
-    today_start = datetime.datetime.strptime(today_start, "%d-%m-%Y %H:%M:%S")
-    today_end   = datetime.datetime.strptime(today_end, "%d-%m-%Y %H:%M:%S")
+    if date == "today":
+        day = datetime.datetime.now().strftime("%d-%m-%Y")
+    else: 
+        day = date
 
-    subset = log[(log["Date"] > today_start) & (log["Date"] < today_end)]
+    day_start = day + " 00:00:00"
+    day_end   = day + " 23:59:59"
+    day_start = datetime.datetime.strptime(day_start, "%d-%m-%Y %H:%M:%S")
+    day_end   = datetime.datetime.strptime(day_end, "%d-%m-%Y %H:%M:%S")
+
+    subset = log[(log["Date"] > day_start) & (log["Date"] < day_end)]
     
     return compute_scores(subset)
 
@@ -165,14 +189,14 @@ def compute_scores(subset):
 
     return A_sum, B_sum
 
-def compute_elo(logfile):
+def compute_elo(log):
     """Computes Elo's from game history"""
 
     elo_B = _elo_B = initial_elo
     elo_A = _elo_A = initial_elo
 
-    d_types = {"A": float, "B": float}
-    log = pd.read_csv(logfile, header=0, dtype=d_types)
+    # d_types = {"A": float, "B": float}
+    # log = pd.read_csv(logfile, header=0, dtype=d_types)
 
     dates = log["Date"].tolist()
 

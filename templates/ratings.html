@@ -11,6 +11,7 @@
         var B_data = {{ B_history }};
         var dates_data = {{ dates|safe }};
         var white = "{{ white }}"
+        var daily_scores = {{ daily_scores|safe }};
 
         var setColors = function(white) {
             if (white == "{{A}}") {
@@ -31,12 +32,23 @@
             //     })
             // })
 
+            $("#dates").change(function() {
+                x = JSON.parse($("#dates").val());
+                $("#A_daily").html(x[0])
+                $("#B_daily").html(x[1])
+            });
+
             document.getElementById("home-button").onclick = function() {
                 window.location = "/"
             }
             setColors(white)
 
             options = {
+                animation: {
+                    onComplete: function(){
+                        
+                    }
+                },
                 scales: {
                     xAxes: [{
                         ticks: {
@@ -200,7 +212,6 @@
 
     <div>
         <h1>{{A}}-{{B}} Chess Ratings</h1>
-        
     </div>
     
     <table class="eloboxbox">
@@ -213,7 +224,6 @@
     </table>
     
     <span style = "right: 0">Points for win: {{P}}</span>
-
     
     <div class="chartWrapper">
         <div class="chartAreaWrapper">
@@ -226,17 +236,25 @@
             <table>
                 <tr>
                     <th colspan="2">All time score</th>
-                    <th colspan="2">Daily score</th>
+                    <th colspan="2">
+                        Daily score
+                        
+                        <select id="dates">
+                            {% for date, scores in daily_scores.items() %}
+                                <option value="{{ scores }}">{{ date }}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
                 </tr>
                 <tr>
                     <td>{{A_total}}</td>
                     <td>{{B_total}}</td>
-                    <td>{{A_daily}}</td>
-                    <td>{{B_daily}}</td>
+                    <td id="A_daily">{{A_daily}}</td>
+                    <td id="B_daily">{{B_daily}}</td>
                 </tr>
             </table>
         </div>
-
+    
     <h2>New result:</h2>
     <form id="new-result-form" action="/new?p1={{A}}&p2={{B}}" method="POST">
         <table id="buttontable">
