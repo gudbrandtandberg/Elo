@@ -60,6 +60,13 @@ def ratings():
     A_total, B_total = compute_scores(log)
 
     daily_scores = compute_daily_scores(log)
+    
+    today = datetime.datetime.now().strftime("%d-%m-%Y")
+    if today not in daily_scores:
+        daily_scores["today"] = [0, 0]
+    else:
+        daily_scores["today"] = daily_scores[today]
+        del daily_scores[today]
 
     p1_history, p2_history, dates = compute_elo(log)
     dates_str = list(map(lambda x: x.strftime("%d-%m-%Y"), dates))
