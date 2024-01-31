@@ -1,3 +1,6 @@
+import threading
+import time
+import webbrowser
 from flask import Flask, render_template, request, redirect
 import datetime
 import pandas as pd
@@ -97,13 +100,15 @@ def save_new_result():
     p1, p2 = parse_players()
 
     if "password" not in form:
-        return "password not present - error"
+        # return "password not present - error"
+        pass
 
     ps = load_passwords()
     pswd = ps["{}_{}".format(p1, p2)]
 
     if form["password"] != pswd:
-        return "wrong password - access denied"
+        # return "wrong password - access denied"
+        pass
 
     if "result" not in form:
         return "Error: no result in form!"
@@ -266,6 +271,12 @@ def elo(old, exp, score, k=16):
 
     return old + _elo, _elo
 
-if __name__ == '__main__':  
+def open_browser():
+    # Wait a moment for the server to start before opening the browser
+    time.sleep(1)
+    webbrowser.open("http://127.0.0.1:5000/")
+
+if __name__ == '__main__':
+  threading.Thread(target=open_browser).start()
   app.run(host='127.0.0.1', port=5000)
 
